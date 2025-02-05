@@ -10,8 +10,11 @@ import { isAdmin } from "../../../../../utils/isAdmin";
 export default function EditProduct() {
   const router = useRouter();
   const { user, isSignedIn } = useUser();
+
   const params = useParams();
-  const id = Array.isArray(params.id) ? params.id[0] : params.id;
+  const id = params?.id ? (Array.isArray(params.id) ? params.id[0] : params.id) : null;
+
+  
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -27,7 +30,11 @@ export default function EditProduct() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!id) return;
+    if (!id) {
+      setError("Invalid product ID.");
+      setLoading(false);
+      return;
+    }
 
     async function fetchProduct() {
       try {
@@ -92,6 +99,11 @@ export default function EditProduct() {
       }
 
       // Update product document
+      if (!id) {
+        alert("Error: Missing product ID.");
+        return;
+      }
+      
       await client
         .patch(id)
         .set({
@@ -109,6 +121,7 @@ export default function EditProduct() {
           },
         })
         .commit();
+      
 
       alert("✅ Product updated successfully!");
       router.push("/products");
