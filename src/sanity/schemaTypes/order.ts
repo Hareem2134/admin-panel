@@ -1,96 +1,40 @@
 export default {
-  name: 'order',
-  title: 'Orders',
-  type: 'document',
+  name: "order",
+  type: "document",
+  title: "Order",
   fields: [
     {
-      name: 'user',
-      title: 'User',
-      type: 'reference',
-      to: [{ type: 'user' }]
+      name: "items",
+      type: "array",
+      of: [
+        {
+          type: "object",
+          fields: [
+            { name: "food", type: "reference", to: [{ type: "food" }] },
+            { name: "quantity", type: "number", title: "Quantity" },
+            { name: "priceAtPurchase", type: "number", title: "Price at Purchase" },
+          ],
+        },
+      ],
     },
+    { name: "total", type: "number", title: "Total" },
+    { name: "subtotal", type: "number", title: "Subtotal" },
+    { name: "discount", type: "number", title: "Discount" },
+    { name: "shippingCost", type: "number", title: "Shipping Cost" },
+    { name: "status", type: "string", title: "Status" },
+    { name: "date", type: "datetime", title: "Order Date" },
     {
-      name: 'items',
-      title: 'Items',
-      type: 'array',
-      of: [{
-        type: 'object',
-        fields: [
-          {
-            name: 'product',
-            title: 'Product',
-            type: 'reference',
-            to: [{ type: 'food' }]
-          },
-          {
-            name: 'quantity',
-            title: 'Quantity',
-            type: 'number'
-          },
-          {
-            name: 'price',
-            title: 'Price at Purchase',
-            type: 'number'
-          }
-        ]
-      }]
-    },
-    {
-      name: 'status',
-      title: 'Status',
-      type: 'string',
-      options: {
-        list: [
-          { title: 'Pending', value: 'pending' },
-          { title: 'Processing', value: 'processing' },
-          { title: 'Shipped', value: 'shipped' },
-          { title: 'Delivered', value: 'delivered' },
-          { title: 'Cancelled', value: 'cancelled' }
-        ],
-        layout: 'dropdown'
-      },
-      initialValue: 'pending'
-    },
-    {
-      name: 'total',
-      title: 'Total Amount',
-      type: 'number'
-    },
-    {
-      name: 'shippingAddress',
-      title: 'Shipping Address',
-      type: 'object',
+      name: "shippingAddress",
+      type: "object",
       fields: [
-        { name: 'street', type: 'string' },
-        { name: 'city', type: 'string' },
-        { name: 'state', type: 'string' },
-        { name: 'zip', type: 'string' },
-        { name: 'country', type: 'string' }
-      ]
+        { name: "street", type: "string", title: "Street" },
+        { name: "city", type: "string", title: "City" },
+        { name: "state", type: "string", title: "State" },
+        { name: "zip", type: "string", title: "ZIP Code" },
+        { name: "country", type: "string", title: "Country" },
+      ],
     },
-    {
-      name: 'trackingNumber',
-      title: 'Tracking Number',
-      type: 'string'
-    },
-    {
-      name: 'estimatedDelivery',
-      title: 'Estimated Delivery',
-      type: 'datetime'
-    }
+    { name: "paymentMethod", type: "string", title: "Payment Method" },
+    { name: "transactionId", type: "string", title: "Transaction ID" },
   ],
-  preview: {
-    select: {
-      title: 'user.name',
-      subtitle: 'status',
-      total: 'total'
-    },
-    prepare(selection: { title: any; subtitle: any; total: any }) {
-      const { title, subtitle, total } = selection
-      return {
-        title: `Order by ${title}`,
-        subtitle: `${subtitle} - $${total}`,
-      }
-    }
-  }
-}
+};

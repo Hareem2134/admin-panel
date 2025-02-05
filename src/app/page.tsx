@@ -1,51 +1,133 @@
+"use client";
+import AdminLayout from "../../components/AdminLayout";
+import { useEffect, useState } from "react";
 import { client } from "../sanity/lib/client";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import RealTimeOrders from "../../components/RealTimeOrders";
+import { useUser, SignInButton } from "@clerk/nextjs";
 
-export default async function Home() {
-  const products = await client.fetch(`
-    *[_type == "product"]{
-      _id, name, description, price, category, stock,
-      "imageUrl": image.asset->url
-    } | order(_createdAt desc)[0...6]
-  `);
+const HomePage = () => {
+  const { isSignedIn } = useUser();
+
+  // Fetch statistics
+  const [stats, setStats] = useState({
+    totalOrders: 0,
+    totalRevenue: 0,
+    pendingOrders: 0,
+    productsCount: 0,
+    salesData: [] as { month: string; sales: number }[],
+  });
+
+  useEffect(() => {
+    if (!isSignedIn) return; // ✅ Prevent fetching data if not signed in
+
+    const fetchData = async () => {
+      const orders = await client.fetch(`*[_type == "order"]`);
+      const products = await client.fetch(`*[_type == "food"]`);
+      
+      const revenue = orders.reduce((acc: number, order: any) => acc + order.total, 0);
+      const pending = orders.filter((order: any) => order.status === 'pending').length;
+      
+      // Sales data calculation
+      const monthlySales = orders.reduce((acc: any, order: any) => {
+        const month = new Date(order.date).toLocaleString('default', { month: 'short' });
+        acc[month] = (acc[month] || 0) + order.total;
+        return acc;
+      }, {});
+
+      setStats({
+        totalOrders: orders.length,
+        totalRevenue: revenue,
+        pendingOrders: pending,
+        productsCount: products.length,
+        salesData: Object.entries(monthlySales).map(([month, sales]) => ({
+          month,
+          sales: Number(sales),
+        })),
+      });
+    };
+
+    fetchData();
+  }, [isSignedIn]); // ✅ Fetch only when signed in
+
+
+  // ✅ Always return JSX after hooks
+  if (!isSignedIn) {
+    return (
+      <div className="h-screen flex flex-col justify-center items-center">
+        <p className="text-xl mb-4">You must sign in to access the admin panel.</p>
+        <SignInButton />
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Hero Section */}
-      <section className="bg-blue-500 text-white text-center py-16">
-        <h1 className="text-4xl font-bold">Welcome to Our Store</h1>
-        <p className="mt-2 text-lg">Find the best products at unbeatable prices.</p>
-      </section>
-
-      {/* Featured Products */}
-      <section className="max-w-6xl mx-auto py-10">
-        <h2 className="text-3xl font-bold mb-5">Featured Products</h2>
-        <div className="grid grid-cols-3 gap-4">
-          {products.map((product: any) => (
-            <div key={product._id} className="bg-white p-4 shadow rounded-lg">
-              <img src={product.imageUrl} alt={product.name} className="w-full h-48 object-cover" />
-              <h3 className="text-xl font-semibold mt-2">{product.name}</h3>
-              <p className="text-gray-600">${product.price}</p>
-              <button className="mt-3 bg-blue-500 text-white px-4 py-2 rounded">Buy Now</button>
-            </div>
-          ))}
+    <AdminLayout>
+      <div className="space-y-6">
+        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+        
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="bg-blue-100 p-4 rounded-lg">
+            <h3 className="text-blue-800 text-sm">Total Orders</h3>
+            <p className="text-2xl font-bold text-blue-600">{stats.totalOrders}</p>
+          </div>
+          <div className="bg-green-100 p-4 rounded-lg">
+            <h3 className="text-green-800 text-sm">Total Revenue</h3>
+            <p className="text-2xl font-bold text-green-600">${stats.totalRevenue.toLocaleString()}</p>
+          </div>
+          <div className="bg-yellow-100 p-4 rounded-lg">
+            <h3 className="text-yellow-800 text-sm">Pending Orders</h3>
+            <p className="text-2xl font-bold text-yellow-600">{stats.pendingOrders}</p>
+          </div>
+          <div className="bg-purple-100 p-4 rounded-lg">
+            <h3 className="text-purple-800 text-sm">Total Products</h3>
+            <p className="text-2xl font-bold text-purple-600">{stats.productsCount}</p>
+          </div>
         </div>
-      </section>
 
-      {/* Categories Section */}
-      <section className="bg-gray-200 py-10">
-        <h2 className="text-3xl font-bold text-center mb-5">Shop by Category</h2>
-        <div className="flex justify-center space-x-4">
-          <button className="bg-white shadow p-4 rounded-lg">Electronics</button>
-          <button className="bg-white shadow p-4 rounded-lg">Clothing</button>
-          <button className="bg-white shadow p-4 rounded-lg">Home Appliances</button>
+        {/* Sales Chart */}
+        <div className="bg-white p-6 rounded-lg shadow">
+          <h2 className="text-xl font-semibold mb-4">Monthly Sales</h2>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={stats.salesData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="sales" fill="#4F46E5" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
-      </section>
 
-      {/* AI Recommendations (Placeholder) */}
-      <section className="max-w-6xl mx-auto py-10">
-        <h2 className="text-3xl font-bold mb-5">AI Recommendations</h2>
-        <p>Coming Soon: Personalized product recommendations powered by AI.</p>
-      </section>
-    </div>
+        {/* Recent Orders */}
+        <div className="bg-white p-6 rounded-lg shadow">
+          <h2 className="text-xl font-semibold mb-4">Recent Orders</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-gray-50">
+                  <th className="px-4 py-2 text-left text-sm">Order ID</th>
+                  <th className="px-4 py-2 text-left text-sm">Customer</th>
+                  <th className="px-4 py-2 text-left text-sm">Amount</th>
+                  <th className="px-4 py-2 text-left text-sm">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td colSpan={4} className="text-center py-4">
+                    <RealTimeOrders />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </AdminLayout>
   );
-}
+};
+
+export default HomePage;

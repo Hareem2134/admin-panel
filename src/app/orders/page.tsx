@@ -2,6 +2,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { client } from "@/sanity/lib/client";
+import AdminLayout from "../../../components/AdminLayout";
 
 interface Order {
   _id: string;
@@ -42,11 +43,12 @@ export default function OrdersPage() {
   }, []);
 
   return (
+    <AdminLayout>
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Orders</h1>
       <div className="grid gap-4">
         {orders.map((order) => (
-          <div key={order._id} className="border p-4 rounded-lg">
+          <div key={order._id} className="border p-4 rounded-lg shadow-black shadow-sm transition-transform hover:shadow-black hover:shadow-md hover:scale-105">
             <div className="flex justify-between">
               <span>Order #{order._id.slice(-6)}</span>
               <span>${order.total}</span>
@@ -58,5 +60,6 @@ export default function OrdersPage() {
         ))}
       </div>
     </div>
+    </AdminLayout>
   );
 }
