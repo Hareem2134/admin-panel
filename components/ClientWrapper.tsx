@@ -10,10 +10,10 @@ export default function ClientWrapper({ children }: { children: React.ReactNode 
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!isLoaded) return;
+    if (!isLoaded) return; // Wait for Clerk to load
 
-    // Skip authentication checks for the sign-in page
-    if (pathname === "/sign-in") {
+    // Skip authentication checks for the sign-in and sign-up pages
+    if (pathname === "/sign-in" || pathname === "/sign-up") {
       setLoading(false);
       return;
     }
@@ -24,8 +24,9 @@ export default function ClientWrapper({ children }: { children: React.ReactNode 
       return;
     }
 
+    // If the user is signed in, allow access to the page
     setLoading(false);
-  }, [isSignedIn, router, isLoaded, pathname]);
+  }, [isSignedIn, isLoaded, pathname, router]);
 
   if (!isLoaded || loading) {
     return <div className="text-center p-6">🔄 Loading authorization...</div>;
