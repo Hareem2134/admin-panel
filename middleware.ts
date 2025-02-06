@@ -8,6 +8,9 @@ const isProtectedRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
+
+  authorizedParties: ['https://admin-restaurant-ecommerce-website.vercel.app']
+
   // Protect admin routes and redirect unauthenticated users to /login
   if (!(await auth()).userId && isProtectedRoute(req)) {
     const loginUrl = new URL("/login", req.url);
