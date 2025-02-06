@@ -1,9 +1,13 @@
-import { clerkMiddleware } from "@clerk/nextjs/server";
-// import { NextResponse } from "next/server";
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-export default clerkMiddleware();
+const isProtectedRoute = createRouteMatcher(["/dashboard(.*)"]);
 
-// ✅ Apply middleware only on protected routes
+export default clerkMiddleware((auth, req) => {
+  if (isProtectedRoute(req)) {
+    auth().protect();
+  }
+});
+
 export const config = {
-  matcher: ["/dashboard/:path*", "/discounts/:path*", "/products/:path*", "/orders/:path*"],
+  matcher: ["/((?!.*\\..*|_next).*)", "/", "/(api|trpc)(.*)"],
 };

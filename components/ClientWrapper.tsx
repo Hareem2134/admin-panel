@@ -1,49 +1,34 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 
-// Hardcoded admin emails
-const ADMIN_EMAILS = ["admin@example.com", "hareemfarooqi2134@gmail.com"];
-
 export default function ClientWrapper({ children }: { children: React.ReactNode }) {
-  const { user, isSignedIn, isLoaded } = useUser();
+  const { isSignedIn, isLoaded } = useUser();
   const router = useRouter();
-  const [authChecked, setAuthChecked] = useState(false);
+  const pathname = usePathname();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!isLoaded) return;
 
+    // Skip authentication checks for the sign-in page
+    if (pathname === "/sign-in") {
+      setLoading(false);
+      return;
+    }
+
+    // Redirect to sign-in if the user is not signed in
     if (!isSignedIn) {
-      setAuthChecked(true); // Allow login page to render
+      router.push("/sign-in");
       return;
     }
 
-    // Wait for user email to load
-    const email = user?.emailAddresses?.[0]?.emailAddress || "";
-    if (!email) return;
+    setLoading(false);
+  }, [isSignedIn, router, isLoaded, pathname]);
 
-    // If not an admin, redirect to login
-    if (!ADMIN_EMAILS.includes(email)) {
-      alert("❌ Unauthorized: Only admin users can log in.");
-      router.replace("/login"); // Use replace() to avoid back button issues
-      return;
-    }
-
-    // If already on the correct page, avoid redirect loops
-    if (window.location.pathname === "/") {
-      setAuthChecked(true);
-      return;
-    }
-
-    // Redirect admin users only if necessary
-    router.replace("/");
-
-    setAuthChecked(true);
-  }, [isSignedIn, user, isLoaded, router]);
-
-  if (!isLoaded || !authChecked) {
-    return <div className="text-center p-6">🔄 Checking authentication...</div>;
+  if (!isLoaded || loading) {
+    return <div className="text-center p-6">🔄 Loading authorization...</div>;
   }
 
   return <>{children}</>;

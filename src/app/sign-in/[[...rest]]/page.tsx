@@ -2,15 +2,13 @@
 
 import { SignIn } from "@clerk/nextjs";
 
-export default function LoginPage() {
+export default function SignInPage() {
   return (
     <div className="flex justify-center items-center h-screen">
-      <SignIn />
+      <SignIn routing="path" path="/sign-in" />
     </div>
   );
 }
-
-
 
 
 
@@ -22,7 +20,7 @@ export default function LoginPage() {
 // import { useState } from "react";
 // import { useRouter } from "next/navigation";
 
-// export default function Login() {
+// export default function sign-in() {
 //   const [email, setEmail] = useState("");
 //   const [password, setPassword] = useState("");
 //   const [error, setError] = useState<string | null>(null);
@@ -47,7 +45,7 @@ export default function LoginPage() {
 //         setError("Invalid email or password. Please try again.");
 //       }
 //     } catch (error) {
-//       console.error("Login error:", error);
+//       console.error("sign-in error:", error);
 //       setError("An unexpected error occurred. Please try again later.");
 //     } finally {
 //       setLoading(false);
@@ -60,7 +58,7 @@ export default function LoginPage() {
 //         onSubmit={handleSubmit}
 //         className="bg-white p-6 shadow rounded w-96"
 //       >
-//         <h2 className="text-2xl font-bold mb-4 text-center">Admin Login</h2>
+//         <h2 className="text-2xl font-bold mb-4 text-center">Admin sign-in</h2>
 //         {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
 //         <div className="mb-4">
 //           <label className="block text-sm font-semibold mb-2" htmlFor="email">
@@ -102,7 +100,7 @@ export default function LoginPage() {
 //           }`}
 //           disabled={loading}
 //         >
-//           {loading ? "Logging in..." : "Login"}
+//           {loading ? "Logging in..." : "sign-in"}
 //         </button>
 //       </form>
 //     </div>
