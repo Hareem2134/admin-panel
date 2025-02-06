@@ -13,31 +13,27 @@ export default function ClientWrapper({ children }: { children: React.ReactNode 
 
   useEffect(() => {
     if (!isLoaded) return;
-
-    // ✅ Allow anyone to see the login page
+  
     if (!isSignedIn) {
-      setLoading(false); // ✅ Stop loading, allow login page to be visible
+      setLoading(false);
       return;
     }
-
-    // Check if user email is in the allowed list
+  
     const email = user?.emailAddresses[0]?.emailAddress;
     if (!email || !ADMIN_EMAILS.includes(email)) {
       alert("❌ Unauthorized: Only admin users can log in.");
       router.push("/login");
       return;
     }
-
-    // ✅ If authorized, redirect to the home/dashboard page
-    router.push("/"); // 🔥 Redirects admin users after login
-
-    // ✅ Allow admin users
+  
+    // Remove the redirect here
     setLoading(false);
   }, [isSignedIn, user, router, isLoaded]);
-
-  if (!isLoaded || loading) {
-    return <div className="text-center p-6">🔄 Loading authorization...</div>;
+  
+  // Conditionally redirect outside of useEffect
+  if (isSignedIn && !loading) {
+    router.push("/"); // 🔥 Redirects admin users after login
   }
-
+  
   return <>{children}</>;
 }
