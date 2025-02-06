@@ -14,21 +14,21 @@ export default function ClientWrapper({ children }: { children: React.ReactNode 
   useEffect(() => {
     if (!isLoaded) return;
 
-    // If user is not signed in, redirect to login page
+    // ✅ Allow anyone to see the login page
     if (!isSignedIn) {
-      router.push("/login");
+      setLoading(false); // ✅ Stop loading, allow login page to be visible
       return;
     }
 
     // Check if user email is in the allowed list
     const email = user?.emailAddresses[0]?.emailAddress;
     if (!email || !ADMIN_EMAILS.includes(email)) {
-      alert("❌ Unauthorized access.");
+      alert("❌ Unauthorized: Only admin users can log in.");
       router.push("/");
       return;
     }
 
-    // ✅ Set loading to false once user is authorized
+    // ✅ Allow admin users
     setLoading(false);
   }, [isSignedIn, user, router, isLoaded]);
 
