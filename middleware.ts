@@ -1,5 +1,6 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
+// Define protected routes
 const isProtectedRoute = createRouteMatcher([
   "/dashboard(.*)",
   "/orders(.*)",
@@ -7,10 +8,17 @@ const isProtectedRoute = createRouteMatcher([
   "/discounts(.*)",
 ]);
 
-export default clerkMiddleware((auth, req) => {
-  return auth().handleAuth(req, {
-    authorizedParties: ['https://admin-restaurant-ecommerce-website.vercel.app']
-  });
+export default clerkMiddleware(async (auth, req) => {
+  // Wait for the auth object to resolve
+  const authObject = await auth();
+
+  // If the route is protected and the user is not signed in, redirect to sign-in
+  if (isProtectedRoute(req) && !authObject.userId) {
+    return authObject.redirectToSignIn();
+  }
+
+  // Allow request to proceed
+  return;
 });
 
 export const config = {
