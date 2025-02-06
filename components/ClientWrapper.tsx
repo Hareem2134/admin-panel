@@ -2,7 +2,9 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
-import { isAdmin } from "../utils/isAdmin";
+
+// Hardcoded admin emails
+const ADMIN_EMAILS = ["admin@example.com", "hareemfarooqi2134@gmail.com"];
 
 export default function ClientWrapper({ children }: { children: React.ReactNode }) {
   const { user, isSignedIn, isLoaded } = useUser();
@@ -10,29 +12,23 @@ export default function ClientWrapper({ children }: { children: React.ReactNode 
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function checkAdmin() {
-      if (!isLoaded) return;
-      
-      if (!isSignedIn) {
-        router.push("/login");
-        return;
-      }
+    if (!isLoaded) return;
 
-      try {
-        const email = user?.emailAddresses[0]?.emailAddress;
-        if (await isAdmin(email)) {
-          setLoading(false);
-        } else {
-          alert("Unauthorized access");
-          router.push("/");
-        }
-      } catch (error) {
-        console.error("Authorization error:", error);
-        router.push("/error");
-      }
+    // Redirect all unauthorized users away from the login page
+    if (!isSignedIn) {
+      router.push("/");
+      return;
     }
 
-    checkAdmin();
+    // Check if user is in the allowed list
+    const email = user?.emailAddresses[0]?.emailAddress;
+    if (!email || !ADMIN_EMAILS.includes(email)) {
+      alert("❌ Unauthorized access.");
+      router.push("/");
+      return;
+    }
+
+    setLoading(false);
   }, [isSignedIn, user, router, isLoaded]);
 
   if (!isLoaded || loading) {
