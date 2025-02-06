@@ -24,12 +24,12 @@ export default function ClientWrapper({ children }: { children: React.ReactNode 
     const email = user?.emailAddresses[0]?.emailAddress;
     if (!email || !ADMIN_EMAILS.includes(email)) {
       alert("❌ Unauthorized: Only admin users can log in.");
-      router.push("/");
+      router.push("/login");
       return;
     }
 
     // ✅ If authorized, redirect to the home/dashboard page
-    router.push("/dashboard"); // 🔥 Redirects admin users after login
+    router.push("/"); // 🔥 Redirects admin users after login
 
     // ✅ Allow admin users
     setLoading(false);
