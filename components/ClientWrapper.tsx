@@ -14,13 +14,13 @@ export default function ClientWrapper({ children }: { children: React.ReactNode 
   useEffect(() => {
     if (!isLoaded) return;
 
-    // Redirect all unauthorized users away from the login page
+    // If user is not signed in, redirect to login page
     if (!isSignedIn) {
-      router.push("/");
+      router.push("/login");
       return;
     }
 
-    // Check if user is in the allowed list
+    // Check if user email is in the allowed list
     const email = user?.emailAddresses[0]?.emailAddress;
     if (!email || !ADMIN_EMAILS.includes(email)) {
       alert("❌ Unauthorized access.");
@@ -28,11 +28,12 @@ export default function ClientWrapper({ children }: { children: React.ReactNode 
       return;
     }
 
+    // ✅ Set loading to false once user is authorized
     setLoading(false);
   }, [isSignedIn, user, router, isLoaded]);
 
   if (!isLoaded || loading) {
-    return <div>Loading authorization...</div>;
+    return <div className="text-center p-6">🔄 Loading authorization...</div>;
   }
 
   return <>{children}</>;
