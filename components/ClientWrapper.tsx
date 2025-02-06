@@ -9,31 +9,42 @@ const ADMIN_EMAILS = ["admin@example.com", "hareemfarooqi2134@gmail.com"];
 export default function ClientWrapper({ children }: { children: React.ReactNode }) {
   const { user, isSignedIn, isLoaded } = useUser();
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
+  const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
     if (!isLoaded) return;
-  
+
     if (!isSignedIn) {
-      setLoading(false);
+      setAuthChecked(true); // Allow login page to render
       return;
     }
-  
-    const email = user?.emailAddresses[0]?.emailAddress;
-    if (!email || !ADMIN_EMAILS.includes(email)) {
+
+    // Wait for user email to load
+    const email = user?.emailAddresses?.[0]?.emailAddress || "";
+    if (!email) return;
+
+    // If not an admin, redirect to login
+    if (!ADMIN_EMAILS.includes(email)) {
       alert("❌ Unauthorized: Only admin users can log in.");
-      router.push("/login");
+      router.replace("/login"); // Use replace() to avoid back button issues
       return;
     }
-  
-    // Remove the redirect here
-    setLoading(false);
-  }, [isSignedIn, user, router, isLoaded]);
-  
-  // Conditionally redirect outside of useEffect
-  if (isSignedIn && !loading) {
-    router.push("/"); // 🔥 Redirects admin users after login
+
+    // If already on the correct page, avoid redirect loops
+    if (window.location.pathname === "/") {
+      setAuthChecked(true);
+      return;
+    }
+
+    // Redirect admin users only if necessary
+    router.replace("/");
+
+    setAuthChecked(true);
+  }, [isSignedIn, user, isLoaded, router]);
+
+  if (!isLoaded || !authChecked) {
+    return <div className="text-center p-6">🔄 Checking authentication...</div>;
   }
-  
+
   return <>{children}</>;
 }

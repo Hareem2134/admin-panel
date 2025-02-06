@@ -1,26 +1,9 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { clerkMiddleware } from "@clerk/nextjs/server";
+// import { NextResponse } from "next/server";
 
-// Define protected routes
-const isProtectedRoute = createRouteMatcher([
-  "/dashboard(.*)",
-  "/orders(.*)",
-  "/products(.*)",
-  "/discounts(.*)",
-]);
+export default clerkMiddleware();
 
-export default clerkMiddleware(async (auth, req) => {
-  // Wait for the auth object to resolve
-  const authObject = await auth();
-
-  // If the route is protected and the user is not signed in, redirect to sign-in
-  if (isProtectedRoute(req) && !authObject.userId) {
-    return authObject.redirectToSignIn();
-  }
-
-  // Allow request to proceed
-  return;
-});
-
+// ✅ Apply middleware only on protected routes
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/dashboard/:path*", "/discounts/:path*", "/products/:path*", "/orders/:path*"],
 };
