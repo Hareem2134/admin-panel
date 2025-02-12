@@ -1,217 +1,173 @@
 "use client";
-
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import AdminLayout from "../../../../../components/AdminLayout";
-import { useState, useEffect } from "react";
-import { client } from "../../../../sanity/lib/client";
-import { useRouter, useParams } from "next/navigation";
-import { useUser } from "@clerk/nextjs";
-import { isAdmin } from "../../../../../utils/isAdmin";
 
-export default function EditProduct() {
-  const router = useRouter();
-  const { user, isSignedIn } = useUser();
+type Food = {
+  _id: string;
+  name: string;
+  slug: string;
+  category: string;
+  price: number;
+  originalPrice: number;
+  tags: string[];
+  images: string[];
+  description: string;
+  longDescription: string;
+  available: boolean;
+};
 
-  const params = useParams();
-  const id = params?.id ? (Array.isArray(params.id) ? params.id[0] : params.id) : null;
-
-  
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    price: 0,
-    category: "",
-    stock: 0,
-    image: null as File | null,
-    imageUrl: null as string | null,
-  });
+export default function FoodsPage() {
+  const [foods, setFoods] = useState<Food[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const router = useRouter();
+  
+  const [form, setForm] = useState<{
+    name: string;
+    slug: string;
+    category: string;
+    price: string;
+    originalPrice: string;
+    tags: string;
+    images: string[];
+    description: string;
+    longDescription: string;
+    available: boolean;
+  }>({
+    name: "",
+    slug: "",
+    category: "",
+    price: "",
+    originalPrice: "",
+    tags: "",
+    images: [],
+    description: "",
+    longDescription: "",
+    available: false,
+  });
 
   useEffect(() => {
-    if (!id) {
-      setError("Invalid product ID.");
-      setLoading(false);
-      return;
-    }
-
-    async function fetchProduct() {
-      try {
-        const product = await client.fetch(
-          `*[_type == "food" && _id == $id][0]{
-            ...,
-            "imageUrl": image.asset->url
-          }`,
-          { id }
-        );
-
-        if (product) {
-          setFormData({
-            name: product.name || "",
-            description: product.description || "",
-            price: product.price || 0,
-            category: product.category || "",
-            stock: product.stock || 0,
-            imageUrl: product.imageUrl || null,
-            image: null,
-          });
-        } else {
-          setError("Product not found.");
-        }
-      } catch (err) {
-        console.error("Error fetching product:", err);
-        setError("Failed to fetch product. Please check permissions.");
-      } finally {
+    fetch("/api/food")
+      .then((res) => res.json())
+      .then((data) => {
+        setFoods(data);
         setLoading(false);
-      }
-    }
-    fetchProduct();
-  }, [id]);
+      })
+      .catch((error) => {
+        console.error("Error fetching foods:", error);
+        setLoading(false);
+      });
+  }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files?.[0]) {
-      setFormData((prev) => ({ ...prev, image: e.target.files![0] }));
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setIsSubmitting(true);
+    setError("");
+    setSuccess("");
 
     try {
-      // Check if user is admin
-      const email = user?.emailAddresses[0]?.emailAddress;
-      if (!(await isAdmin(email))) {
-        alert("Unauthorized: You do not have permission to update products.");
-        return;
-      }
+      const method = editingId ? "PUT" : "POST";
+      const url = editingId ? `/api/food/${editingId}` : "/api/food";
 
-      // Upload new image if exists
-      let imageRef = formData.imageUrl;
-      if (formData.image) {
-        const imageAsset = await client.assets.upload("image", formData.image);
-        imageRef = imageAsset._id;
-      }
+      const response = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...form,
+          price: parseFloat(form.price),
+          originalPrice: parseFloat(form.originalPrice),
+          tags: form.tags.split(",").map((tag) => tag.trim()),
+          images: form.images,
+        }),
+      });
 
-      // Update product document
-      if (!id) {
-        alert("Error: Missing product ID.");
-        return;
-      }
-      
-      await client
-        .patch(id)
-        .set({
-          name: formData.name,
-          description: formData.description,
-          price: Number(formData.price),
-          category: formData.category,
-          stock: Number(formData.stock),
-          image: {
-            _type: "image",
-            asset: {
-              _type: "reference",
-              _ref: imageRef,
-            },
-          },
-        })
-        .commit();
-      
+      if (!response.ok) throw new Error("Failed to save food item");
 
-      alert("✅ Product updated successfully!");
-      router.push("/products");
-    } catch (error: any) {
-      console.error("❌ Error updating product:", error);
-      alert(`Error updating product: ${error.message}`);
-    } finally {
-      setIsSubmitting(false);
+      const updatedFood = await response.json();
+      if (editingId) {
+        setFoods(foods.map(food => (food._id === editingId ? updatedFood : food)));
+      } else {
+        setFoods([...foods, updatedFood]);
+      }
+      setEditingId(null);
+      setForm({
+        name: "",
+        slug: "",
+        category: "",
+        price: "",
+        originalPrice: "",
+        tags: "",
+        images: [],
+        description: "",
+        longDescription: "",
+        available: false,
+      });
+      setSuccess("Food item saved successfully!");
+    } catch (err) {
+      setError("Error saving food item");
+      console.error(err);
     }
-  };
+  }
+
+  async function handleDelete(id: string) {
+    try {
+      const response = await fetch(`/api/food/${id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) throw new Error("Failed to delete food item");
+      setFoods(foods.filter(food => food._id !== id));
+    } catch (err) {
+      console.error("Error deleting food item:", err);
+    }
+  }
+
+  function handleEdit(id: string) {
+    const foodToEdit = foods.find(food => food._id === id);
+    if (foodToEdit) {
+      setEditingId(id);
+      setForm({
+        name: foodToEdit.name || "",
+        slug: foodToEdit.slug || "",
+        category: foodToEdit.category || "",
+        price: foodToEdit.price ? foodToEdit.price.toString() : "",
+        originalPrice: foodToEdit.originalPrice ? foodToEdit.originalPrice.toString() : "",
+        tags: Array.isArray(foodToEdit.tags) ? foodToEdit.tags.join(", ") : "",
+        images: Array.isArray(foodToEdit.images) ? foodToEdit.images : [],
+        description: foodToEdit.description || "",
+        longDescription: foodToEdit.longDescription || "",
+        available: foodToEdit.available ?? false,
+      });
+    }
+  }
 
   return (
     <AdminLayout>
-      <h1 className="text-3xl font-bold mb-5">Edit Product</h1>
-      {error && <p className="text-red-500">{error}</p>}
-      {loading ? (
-        <p className="text-gray-500">Loading product...</p>
-      ) : (
-        <form onSubmit={handleSubmit} className="bg-white p-6 shadow rounded-lg">
-          <label className="block text-sm font-medium mb-1">Product Name</label>
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-            className="w-full p-2 border rounded mb-4"
-          />
-
-          <label className="block text-sm font-medium mb-1">Description</label>
-          <textarea
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            required
-            className="w-full p-2 border rounded mb-4"
-          />
-
-          <label className="block text-sm font-medium mb-1">Price</label>
-          <input
-            type="number"
-            name="price"
-            value={formData.price}
-            onChange={handleChange}
-            required
-            className="w-full p-2 border rounded mb-4"
-          />
-
-          <label className="block text-sm font-medium mb-1">Category</label>
-          <input
-            type="text"
-            name="category"
-            value={formData.category}
-            onChange={handleChange}
-            required
-            className="w-full p-2 border rounded mb-4"
-          />
-
-          <label className="block text-sm font-medium mb-1">Stock</label>
-          <input
-            type="number"
-            name="stock"
-            value={formData.stock}
-            onChange={handleChange}
-            required
-            className="w-full p-2 border rounded mb-4"
-          />
-
-          {/* Image Preview */}
-          <label className="block text-sm font-medium mb-1">Current Image:</label>
-          {formData.imageUrl ? (
-            <img src={formData.imageUrl} alt="Product Image" className="w-24 h-24 object-cover mb-4" />
-          ) : (
-            <p className="text-gray-500">No Image Available</p>
-          )}
-
-          {/* Upload New Image */}
-          <label className="block text-sm font-medium mb-1">Upload New Image:</label>
-          <input
-            type="file"
-            accept="image/*"
-            className="w-full p-2 border rounded mb-4"
-            onChange={handleFileChange}
-          />
-
-          <button type="submit" className="bg-blue-500 text-white p-2 w-full rounded">
-            Update Product
-          </button>
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-4">Food Items</h1>
+      <div className="bg-white p-4 shadow rounded mb-6">
+        <h2 className="text-lg font-semibold mb-2">{editingId ? "Edit Food Item" : "Add New Food Item"}</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input type="text" placeholder="Food Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required className="w-full p-2 border rounded" />
+          <input type="text" placeholder="Category" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} required className="w-full p-2 border rounded" />
+          <input type="number" placeholder="Price" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} required className="w-full p-2 border rounded" />
+          <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">{editingId ? "Update" : "Add"} Food</button>
+          {editingId && <button type="button" onClick={() => setEditingId(null)} className="bg-gray-500 text-white px-4 py-2 rounded">Cancel</button>}
         </form>
-      )}
+      </div>
+      <ul>
+        {foods.map(food => (
+          <li key={food._id} className="bg-white p-4 shadow rounded">
+            <h2>{food.name}</h2>
+            <button onClick={() => handleEdit(food._id)}>Edit</button>
+            <button onClick={() => handleDelete(food._id)}>Delete</button>
+          </li>
+        ))}
+      </ul>
+    </div>
     </AdminLayout>
   );
 }

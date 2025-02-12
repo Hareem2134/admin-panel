@@ -1,4 +1,3 @@
-// utils/isAdmin.ts
 import { client } from "../src/sanity/lib/client";
 
 export async function isAdmin(email: string | null | undefined): Promise<boolean> {
@@ -6,12 +5,9 @@ export async function isAdmin(email: string | null | undefined): Promise<boolean
 
   try {
     const user = await client.fetch(
-      `*[_type == "user"][0]{
-        role
-      }`,
+      `*[_type == "user" && email == "hareemfarooqi2134@gmail.com"]{role}`,
       { email }
     );
-    
     return user?.role === 'admin';
   } catch (error) {
     console.error("Error checking admin status:", error);

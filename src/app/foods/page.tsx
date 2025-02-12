@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import AdminLayout from "../../../../components/AdminLayout";
+import AdminLayout from "../../../components/AdminLayout";
 
 interface Food {
   _id: string;

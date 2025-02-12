@@ -11,10 +11,17 @@ import {structureTool} from 'sanity/structure'
 // Go to https://www.sanity.io/docs/api-versioning to learn how API versioning works
 import {schema} from './src/sanity/schemaTypes'
 import {structure} from './src/sanity/structure'
+import food from '@/sanity/schemaTypes/food'
+import discount from '@/sanity/schemaTypes/discount'
+import category from '@/sanity/schemaTypes/category'
+import order from '@/sanity/schemaTypes/order'
+import user from '@/sanity/schemaTypes/user'
+import { deskTool } from "sanity/desk";
+
 
 const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID
 const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET
-const apiVersion = process.env.NEXT_PUBLIC_SANITY_API_VERSION || '2023-01-01'
+const apiVersion = process.env.NEXT_PUBLIC_SANITY_API_VERSION || '2021-10-21'
 
 // Validate environment variables
 if (!projectId || !dataset) {
@@ -25,12 +32,16 @@ export default defineConfig({
   basePath: '/studio',
   projectId,
   dataset,
+  apiVersion,
   // Add and edit the content schema in the './sanity/schemaTypes' folder
-  schema,
+  schema: { types: [food, discount, order, category, user] },
   plugins: [
     structureTool({structure}),
+    deskTool({ name: "desk" }),
     // Vision is for querying with GROQ from inside the Studio
     // https://www.sanity.io/docs/the-vision-plugin
     visionTool({defaultApiVersion: apiVersion}),
   ],
 })
+
+

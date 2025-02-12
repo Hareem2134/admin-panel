@@ -1,4 +1,3 @@
-// products/page.tsx
 "use client";
 
 import AdminLayout from "../../../components/AdminLayout";
@@ -21,6 +20,15 @@ type Product = {
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [form, setForm] = useState({
+    name: "",
+    description: "",
+    price: "",
+    category: "",
+    stock: "",
+  });
+
   const router = useRouter();
   const { user, isSignedIn } = useUser();
 
@@ -44,11 +52,24 @@ export default function ProductsPage() {
     fetchProducts();
   }, []);
 
-  const deleteProduct = async (productId: string) => {
+  const handleEdit = (id: string) => {
+    const productToEdit = products.find((product) => product._id === id);
+    if (productToEdit) {
+      setEditingId(id);
+      setForm({
+        name: productToEdit.name,
+        description: productToEdit.description,
+        price: productToEdit.price.toString(),
+        category: productToEdit.category,
+        stock: productToEdit.stock.toString(),
+      });
+    }
+  };
+
+  const handleDelete = async (productId: string) => {
     if (!window.confirm("Are you sure you want to delete this product?")) return;
 
     try {
-      // Check if user is admin
       const email = user?.emailAddresses[0]?.emailAddress;
       if (!(await isAdmin(email))) {
         alert("Unauthorized: You do not have permission to delete products.");
@@ -104,14 +125,14 @@ export default function ProductsPage() {
                 <td className="p-3">{product.stock}</td>
                 <td className="p-3 space-x-2">
                   <button
+                    onClick={() => handleEdit(product._id)}
                     className="bg-blue-500 text-white px-3 py-1 rounded"
-                    onClick={() => router.push(`/products/edit/${product._id}`)}
                   >
                     Edit
                   </button>
                   <button
+                    onClick={() => handleDelete(product._id)}
                     className="bg-red-500 text-white px-3 py-1 rounded"
-                    onClick={() => deleteProduct(product._id)}
                   >
                     Delete
                   </button>
