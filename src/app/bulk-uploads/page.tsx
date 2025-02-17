@@ -1,15 +1,26 @@
 "use client";
 import AdminLayout from "../../../components/AdminLayout";
 import { useState } from "react";
-import { client } from "../../sanity/lib/client";
 import Papa, { ParseResult } from "papaparse";
 
 type ProductCSV = {
   name: string;
-  description: string;
   price: string;
+  tag: string;
   category: string;
+  description: string;
+  "long description": string;
   stock: string;
+};
+
+type SanityProduct = {
+  name: string;
+  price: number;
+  tags: string[];
+  category: string;
+  description: string;
+  longDescription: string;
+  stock: number;
 };
 
 export default function BulkUploadPage() {
@@ -22,58 +33,52 @@ export default function BulkUploadPage() {
       const selectedFile = e.target.files[0];
       setFile(selectedFile);
 
-      // Parse CSV correctly
       Papa.parse<ProductCSV>(selectedFile, {
         header: true,
         skipEmptyLines: true,
-        dynamicTyping: true,
         complete: (results) => {
-          const cleanedData = results.data.map(product => ({
-            ...product,
-            price: product.price.toString().replace(/[^0-9.]/g, ""),
-            stock: product.stock.toString().replace(/[^0-9]/g, "")
-          }));
-          setProducts(cleanedData);
+          setProducts(results.data);
         },
-        error: (error: any) => {
-          console.error("Error parsing CSV:", error);
-          alert("Error parsing CSV file. Please check the file format.");
-        },
+        error: (error) => {
+          console.error("CSV parse error:", error);
+          alert("Error parsing CSV file");
+        }
       });
     }
   };
 
   const handleUpload = async () => {
     if (!products.length) return alert("No products to upload!");
-
-    setUploading(true);
     
-      // for (const product of products) {
-      //   await client.create({
-      //     _type: "product",
-      //     name: product.name,
-      //     description: product.description,
-      //     price: Number(product.price),
-      //     category: product.category,
-      //     stock: Number(product.stock),
-      //   });
-      // }
-      
-      try {
+    setUploading(true);
+    try {
+      // Convert CSV data to Sanity format
+      const sanityProducts: SanityProduct[] = products.map(product => ({
+        name: product.name,
+        price: Number(product.price.replace(/[^0-9.]/g, "")),
+        tags: product.tag.split(",").map(t => t.trim()),
+        category: product.category,
+        description: product.description,
+        longDescription: product["long description"],
+        stock: Number(product.stock.replace(/[^0-9]/g, ""))
+      }));
+
       const response = await fetch("/api/products/bulk", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(products),
+        body: JSON.stringify(sanityProducts),
       });
 
-      if (!response.ok) throw new Error("Upload failed");
-      alert("Products uploaded successfully!");
+      const responseData = await response.json();
+      if (!response.ok) throw new Error(responseData.error || "Upload failed");
+      
+      alert(`Successfully uploaded ${responseData.length} products!`);
       setProducts([]);
-    } catch (error) {
-      console.error("Error uploading products:", error);
-      alert("Error uploading products. Please try again.");
+    } catch (error: any) {
+      console.error("Upload error:", error);
+      alert(error.message || "Error uploading products");
     } finally {
       setUploading(false);
     }

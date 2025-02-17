@@ -1,16 +1,16 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { client } from "@/sanity/lib/client";
 
-export async function PUT(req: Request, context: { params: { id: string } }) {
-  const { params } = context; // Extract params correctly
+export async function PUT(
+  req: NextRequest,
+  { params, searchParams }: { params: Record<string, string>; searchParams: URLSearchParams }
+) {
+  const { id } = params;
   try {
     const formData = await req.formData();
     const files = formData.getAll("images") as File[];
-    const data = JSON.parse(formData.get('data') as string);
-    const { id } = params; // now id is string
+    const data = JSON.parse(formData.get("data") as string);
 
-    // Update the image handling to:
-    // Handle images properly
     const existingImages = Array.isArray(data.images) ? data.images : [];
     const uploadedImages = await Promise.all(
       files.map(async (file) => {
@@ -19,32 +19,22 @@ export async function PUT(req: Request, context: { params: { id: string } }) {
       })
     );
 
-    // Convert tags to array safely
-    const tags = typeof data.tags === 'string' ? 
-                data.tags.split(",").map((t: string) => t.trim()) : 
-                Array.isArray(data.tags) ? data.tags : [];
+    const tags =
+      typeof data.tags === "string"
+        ? data.tags.split(",").map((t: string) => t.trim())
+        : Array.isArray(data.tags)
+        ? data.tags
+        : [];
 
-    // Validate tags format
     if (!Array.isArray(tags)) {
-      return NextResponse.json(
-        { error: "Invalid tags format" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Invalid tags format" }, { status: 400 });
     }
 
-    // Upload new images
-    // const uploadedImages = await Promise.all(
-    //   files.map(async (file) => {
-    //     const uploaded = await client.assets.upload("image", file);
-    //     return { _type: "image", asset: { _ref: uploaded._id } };
-    //   })
-    // );
-
-    // Update document
-    const updatedFood = await client.patch(id)
+    const updatedFood = await client
+      .patch(id)
       .set({
         ...data,
-        tags, // Use converted tags
+        tags,
         price: parseFloat(data.price),
         originalPrice: data.originalPrice ? parseFloat(data.originalPrice) : undefined,
         images: [...existingImages, ...uploadedImages],
@@ -56,24 +46,24 @@ export async function PUT(req: Request, context: { params: { id: string } }) {
   } catch (error) {
     console.error("Update error:", error);
     return NextResponse.json(
-      { error: "Update failed", details: error instanceof Error ? error.message : "Unknown error" },
+      {
+        error: "Update failed",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
       { status: 500 }
     );
   }
 }
 
-export async function DELETE(req: Request, { params }: { params: Record<string, string> }) {
+export async function DELETE(
+  req: NextRequest,
+  { params, searchParams }: { params: Record<string, string>; searchParams: URLSearchParams }
+) {
+  const { id } = params;
   try {
-    const { id } = params;
     await client.delete(id);
-    return NextResponse.json(
-      { message: "Food item deleted successfully" },
-      { status: 200 }
-    );
+    return NextResponse.json({ message: "Food item deleted successfully" }, { status: 200 });
   } catch (error) {
-    return NextResponse.json(
-      { error: "Failed to delete food item" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to delete food item" }, { status: 500 });
   }
 }
