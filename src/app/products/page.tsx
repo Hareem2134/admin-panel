@@ -407,8 +407,8 @@ export default function FoodsPage() {
                     <td className="px-6 py-4 text-blue-600 font-semibold">${food.price}</td>
                     <td className="px-6 py-4 text-gray-600">{food.category}</td>
                     <td className="px-6 py-4">
-                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${food.available ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                        {food.available ? 'In Stock ✅' : 'Out of Stock ❌'}
+                      <span className={`inline-flex items-center px-7 py-1 rounded-full text-sm font-normal ${food.available ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                        {food.available ? 'In Stock' : 'Out of Stock ❌'}
                       </span>
                     </td>
                     <td className="px-6 py-4 space-x-2">

@@ -1,5 +1,3 @@
-// admin-panel\src\app\bulk-uploads\page.tsx
-
 "use client";
 import AdminLayout from "../../../components/AdminLayout";
 import { useState } from "react";
@@ -28,8 +26,14 @@ export default function BulkUploadPage() {
       Papa.parse<ProductCSV>(selectedFile, {
         header: true,
         skipEmptyLines: true,
-        complete: (results: ParseResult<ProductCSV>) => {
-          setProducts(results.data);
+        dynamicTyping: true,
+        complete: (results) => {
+          const cleanedData = results.data.map(product => ({
+            ...product,
+            price: product.price.toString().replace(/[^0-9.]/g, ""),
+            stock: product.stock.toString().replace(/[^0-9]/g, "")
+          }));
+          setProducts(cleanedData);
         },
         error: (error: any) => {
           console.error("Error parsing CSV:", error);
@@ -43,18 +47,30 @@ export default function BulkUploadPage() {
     if (!products.length) return alert("No products to upload!");
 
     setUploading(true);
-    try {
-      for (const product of products) {
-        await client.create({
-          _type: "product",
-          name: product.name,
-          description: product.description,
-          price: Number(product.price),
-          category: product.category,
-          stock: Number(product.stock),
-        });
-      }
+    
+      // for (const product of products) {
+      //   await client.create({
+      //     _type: "product",
+      //     name: product.name,
+      //     description: product.description,
+      //     price: Number(product.price),
+      //     category: product.category,
+      //     stock: Number(product.stock),
+      //   });
+      // }
+      
+      try {
+      const response = await fetch("/api/products/bulk", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(products),
+      });
+
+      if (!response.ok) throw new Error("Upload failed");
       alert("Products uploaded successfully!");
+      setProducts([]);
     } catch (error) {
       console.error("Error uploading products:", error);
       alert("Error uploading products. Please try again.");
@@ -67,7 +83,7 @@ export default function BulkUploadPage() {
     <AdminLayout>
       <h1 className="text-3xl font-bold mb-5">Bulk Upload Products</h1>
       <input type="file" accept=".csv" className="p-2 border rounded mb-4" onChange={handleFileChange} />
-      <button className="bg-blue-500 text-white p-2 rounded" onClick={handleUpload} disabled={uploading}>
+      <button className="bg-blue-500 text-white p-2 rounded disabled:bg-gray-400" onClick={handleUpload} disabled={uploading}>
         {uploading ? "Uploading..." : "Upload Products"}
       </button>
 

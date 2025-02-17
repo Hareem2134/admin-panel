@@ -58,7 +58,7 @@ const AdminLayout: FC<{ children: ReactNode }> = ({ children }) => {
                   {[
                     { name: "Dashboard", href: "/" },
                     { name: "Orders", href: "/orders" },
-                    { name: "Products", href: "/foods" },
+                    { name: "Products", href: "/products" },
                     { name: "Discounts", href: "/discounts" },
                     { name: "Bulk Upload", href: "/bulk-uploads" },
                   ].map((item) => (

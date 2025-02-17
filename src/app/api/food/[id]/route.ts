@@ -7,6 +7,7 @@ export async function PUT(req: Request, context: { params: { id: string } }) {
     const formData = await req.formData();
     const files = formData.getAll("images") as File[];
     const data = JSON.parse(formData.get('data') as string);
+    const { id } = params; // now id is string
 
     // Update the image handling to:
     // Handle images properly
@@ -24,7 +25,7 @@ export async function PUT(req: Request, context: { params: { id: string } }) {
                 Array.isArray(data.tags) ? data.tags : [];
 
     // Validate tags format
-    if (!Array.isArray(data.tags)) {
+    if (!Array.isArray(tags)) {
       return NextResponse.json(
         { error: "Invalid tags format" },
         { status: 400 }
@@ -40,7 +41,7 @@ export async function PUT(req: Request, context: { params: { id: string } }) {
     // );
 
     // Update document
-    const updatedFood = await client.patch(params.id)
+    const updatedFood = await client.patch(id)
       .set({
         ...data,
         tags, // Use converted tags
@@ -61,9 +62,10 @@ export async function PUT(req: Request, context: { params: { id: string } }) {
   }
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: Request, { params }: { params: Record<string, string> }) {
   try {
-    await client.delete(params.id);
+    const { id } = params;
+    await client.delete(id);
     return NextResponse.json(
       { message: "Food item deleted successfully" },
       { status: 200 }
