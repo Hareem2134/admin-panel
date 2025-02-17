@@ -70,3 +70,54 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+
+
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.4s ease-out forwards;
+}
+
+.animate-shake {
+  animation: shake 0.4s ease-in-out;
+}
+
+/* Stagger animation delays */
+.form-element:nth-child(1) { animation-delay: 0.1s; }
+.form-element:nth-child(2) { animation-delay: 0.2s; }
+.form-element:nth-child(3) { animation-delay: 0.3s; }
+/* Add more as needed up to 10+ */
+.form-element:nth-child(10) { animation-delay: 1s; }
+
+
+.form-container {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: all 0.3s ease-in-out;
+}
+
+.form-container.open {
+  max-height: 2000px;
+  opacity: 1;
+}

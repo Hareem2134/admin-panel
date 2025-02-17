@@ -58,9 +58,9 @@ const AdminLayout: FC<{ children: ReactNode }> = ({ children }) => {
                   {[
                     { name: "Dashboard", href: "/" },
                     { name: "Orders", href: "/orders" },
-                    { name: "Products", href: "/products" },
+                    { name: "Products", href: "/foods" },
                     { name: "Discounts", href: "/discounts" },
-                    { name: "Bulk Upload", href: "/products/bulk-upload" },
+                    { name: "Bulk Upload", href: "/bulk-uploads" },
                   ].map((item) => (
                     <Link key={item.href} href={item.href}>
                       <motion.p

@@ -1,4 +1,4 @@
-// app/orders/page.tsx
+//admin-panel\src\app\orders\page.tsx
 "use client";
 import { useEffect, useState } from "react";
 import { client } from "@/sanity/lib/client";
@@ -44,22 +44,36 @@ export default function OrdersPage() {
 
   return (
     <AdminLayout>
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Orders</h1>
-      <div className="grid gap-4">
-        {orders.map((order) => (
-          <div key={order._id} className="border p-4 rounded-lg shadow-black shadow-sm transition-transform hover:shadow-black hover:shadow-md hover:scale-105">
-            <div className="flex justify-between">
-              <span>Order #{order._id.slice(-6)}</span>
-              <span>${order.total}</span>
+      <div className="p-6 max-w-6xl mx-auto">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            Order Management
+          </h1>
+        </div>
+
+        {/* Orders Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {orders.map((order) => (
+            <div key={order._id} className="bg-white p-6 rounded-2xl shadow-xl hover:shadow-2xl transition-shadow duration-300">
+              <div className="flex justify-between items-center mb-4">
+                <span className="text-lg font-semibold text-gray-800">Order #{order._id.slice(-6)}</span>
+                <span className="text-blue-600 font-semibold">${order.total}</span>
+              </div>
+              <div className="text-sm text-gray-600 mb-4">
+                {new Date(order._createdAt).toLocaleDateString()}
+              </div>
+              <div className="space-y-2">
+                <div className="text-sm text-gray-700">
+                  <span className="font-medium">Status:</span> {order.status}
+                </div>
+                <div className="text-sm text-gray-700">
+                  <span className="font-medium">Shipping Address:</span> {order.shippingAddress.street}, {order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.zip}
+                </div>
+              </div>
             </div>
-            <div className="text-sm text-gray-600">
-              {new Date(order._createdAt).toLocaleDateString()}
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
-    </div>
     </AdminLayout>
   );
 }

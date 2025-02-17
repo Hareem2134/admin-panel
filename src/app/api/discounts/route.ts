@@ -45,3 +45,23 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Failed to create discount" }, { status: 500 });
   }
 }
+
+export async function DELETE(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json({ error: "Discount ID is required" }, { status: 400 });
+    }
+
+    // Delete the discount from Sanity
+    await client.delete(id);
+
+    // Fetch and return the updated list of discounts
+    const updatedDiscounts = await client.fetch(`*[_type == "discount"]`);
+    return NextResponse.json(updatedDiscounts, { status: 200 });
+  } catch (error) {
+    return NextResponse.json({ error: "Failed to delete discount" }, { status: 500 });
+  }
+}

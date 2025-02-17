@@ -58,11 +58,11 @@ export default {
         ],
         description: "Upload multiple images of the food item",
       },
-      {
-        name: "image", // Add the old field back temporarily
-        type: "image",
-        title: "Food Image (Legacy)",
-      },
+      // {
+      //   name: "image", // Add the old field back temporarily
+      //   type: "image",
+      //   title: "Food Image (Legacy)",
+      // },
       {
         name: "description",
         type: "text",

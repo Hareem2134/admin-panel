@@ -1,8 +1,9 @@
-"use client";
+// admin-panel\src\app\bulk-uploads\page.tsx
 
-import AdminLayout from "../../../../components/AdminLayout";
+"use client";
+import AdminLayout from "../../../components/AdminLayout";
 import { useState } from "react";
-import { client } from "../../../sanity/lib/client";
+import { client } from "../../sanity/lib/client";
 import Papa, { ParseResult } from "papaparse";
 
 type ProductCSV = {
@@ -20,14 +21,19 @@ export default function BulkUploadPage() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      setFile(e.target.files[0]);
+      const selectedFile = e.target.files[0];
+      setFile(selectedFile);
 
       // Parse CSV correctly
-      Papa.parse<ProductCSV>(e.target.files[0], {
+      Papa.parse<ProductCSV>(selectedFile, {
         header: true,
         skipEmptyLines: true,
         complete: (results: ParseResult<ProductCSV>) => {
           setProducts(results.data);
+        },
+        error: (error: any) => {
+          console.error("Error parsing CSV:", error);
+          alert("Error parsing CSV file. Please check the file format.");
         },
       });
     }
@@ -37,18 +43,24 @@ export default function BulkUploadPage() {
     if (!products.length) return alert("No products to upload!");
 
     setUploading(true);
-    for (const product of products) {
-      await client.create({
-        _type: "product",
-        name: product.name,
-        description: product.description,
-        price: Number(product.price),
-        category: product.category,
-        stock: Number(product.stock),
-      });
+    try {
+      for (const product of products) {
+        await client.create({
+          _type: "product",
+          name: product.name,
+          description: product.description,
+          price: Number(product.price),
+          category: product.category,
+          stock: Number(product.stock),
+        });
+      }
+      alert("Products uploaded successfully!");
+    } catch (error) {
+      console.error("Error uploading products:", error);
+      alert("Error uploading products. Please try again.");
+    } finally {
+      setUploading(false);
     }
-    setUploading(false);
-    alert("Products uploaded successfully!");
   };
 
   return (
