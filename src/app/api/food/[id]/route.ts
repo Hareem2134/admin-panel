@@ -61,12 +61,17 @@ export async function PUT(req: Request, context: { params: { id: string } }) {
   }
 }
 
-export async function DELETE(req: Request, context: { params: { id: string } }) {
-  const { params } = context; // Extract params correctly
+export async function DELETE(req: Request, { params }: { params: { id: string } }) {
   try {
     await client.delete(params.id);
-    return NextResponse.json({ message: "Food item deleted successfully" }, { status: 200 });
+    return NextResponse.json(
+      { message: "Food item deleted successfully" },
+      { status: 200 }
+    );
   } catch (error) {
-    return NextResponse.json({ error: "Failed to delete food item" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to delete food item" },
+      { status: 500 }
+    );
   }
 }
