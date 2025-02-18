@@ -4,6 +4,8 @@ import { useState } from "react";
 import Papa, { ParseResult } from "papaparse";
 
 type ProductCSV = {
+  available: any;
+  originalPrice: any;
   name: string;
   price: string;
   category: string;
@@ -58,43 +60,41 @@ export default function BulkUploadPage() {
       setError("No products to upload!");
       return;
     }
-    
+  
     setUploading(true);
     setError("");
-    
+  
     try {
       // Transform CSV data to Sanity format
-      const sanityProducts = products.map(product => ({
-        _type: "product",
+      const sanityFoods = products.map((product) => ({
         name: product.name.trim(),
-        price: parseFloat(product.price.replace(/[^0-9.]/g, "")),
-        tags: product.tag 
-          ? product.tag.split(",").map(t => t.trim()).filter(t => t)
-          : [], // Handle missing tags
         category: product.category.trim(),
-        description: product.description?.trim() || "", // Handle optional field
-        longDescription: product["long description"]?.trim() || "", // Handle optional field
-        stock: parseInt(product.stock.replace(/[^0-9]/g, ""), 10)
+        price: parseFloat(product.price.replace(/[^0-9.]/g, "")),
+        originalPrice: parseFloat(product.originalPrice?.replace(/[^0-9.]/g, "") || product.price.replace(/[^0-9.]/g, "")),
+        tags: product.tag?.split(",").map((t) => t.trim()).filter((t) => t) || [], // Convert tags to array
+        description: product.description?.trim() || "",
+        longDescription: product["long description"]?.trim() || "",
+        available: product.available?.toLowerCase() === "true" || true, // Default to true
       }));
-
+  
       const response = await fetch("/api/bulk", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(sanityProducts),
+        body: JSON.stringify(sanityFoods),
       });
-
+  
       const result = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(result.error || "Upload failed");
+  
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || "Upload failed. Check server logs.");
       }
-
-      alert(`Successfully uploaded ${result.length} products!`);
+  
+      alert(`Successfully uploaded ${result.count} food items!`);
       setProducts([]);
       setFile(null);
     } catch (err: any) {
       console.error("Upload error:", err);
-      setError(err.message || "Failed to upload products");
+      setError(err.message || "Failed to upload food items");
     } finally {
       setUploading(false);
     }
