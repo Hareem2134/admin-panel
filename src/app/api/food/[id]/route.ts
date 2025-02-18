@@ -1,12 +1,9 @@
 import { NextResponse } from "next/server";
 import { client } from "@/sanity/lib/client";
 
-interface Context {
-  params: { id: string };
-}
-
-export async function PUT(req: Request, context: Context) {
-  const { id } = context.params; // Extract the ID properly
+// ✅ Use Request & context with params correctly
+export async function PUT(req: Request, { params }: { params: { id: string } }) {
+  const id = params.id; // Ensure correct param extraction
 
   try {
     const formData = await req.formData();
@@ -57,8 +54,8 @@ export async function PUT(req: Request, context: Context) {
   }
 }
 
-export async function DELETE(req: Request, context: Context) {
-  const { id } = context.params; // Correct way to extract ID
+export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+  const id = params.id; // Ensure correct param extraction
 
   try {
     await client.delete(id);
