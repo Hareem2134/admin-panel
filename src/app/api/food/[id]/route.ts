@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import { client } from "@/sanity/lib/client";
 
-export async function PUT(
-  req: Request,
-  context: { params: { id: string } }
-) {
-  const { params } = context; // Correct way to access params
+interface Context {
+  params: { id: string };
+}
+
+export async function PUT(req: Request, context: Context) {
+  const { id } = context.params; // Extract the ID properly
+
   try {
     const formData = await req.formData();
     const files = formData.getAll("images") as File[];
@@ -31,7 +33,7 @@ export async function PUT(
     }
 
     const updatedFood = await client
-      .patch(params.id)
+      .patch(id)
       .set({
         ...data,
         tags,
@@ -55,13 +57,11 @@ export async function PUT(
   }
 }
 
-export async function DELETE(
-  req: Request,
-  context: { params: { id: string } }
-) {
-  const { params } = context;
+export async function DELETE(req: Request, context: Context) {
+  const { id } = context.params; // Correct way to extract ID
+
   try {
-    await client.delete(params.id);
+    await client.delete(id);
     return NextResponse.json({ message: "Food item deleted successfully" }, { status: 200 });
   } catch (error) {
     return NextResponse.json({ error: "Failed to delete food item" }, { status: 500 });

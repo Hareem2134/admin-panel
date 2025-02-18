@@ -6,11 +6,11 @@ import Papa, { ParseResult } from "papaparse";
 type ProductCSV = {
   name: string;
   price: string;
-  tag: string;
   category: string;
-  description: string;
-  "long description": string;
   stock: string;
+  tag?: string; // Optional
+  description?: string; // Optional
+  "long description"?: string; // Optional
 };
 
 export default function BulkUploadPage() {
@@ -68,14 +68,16 @@ export default function BulkUploadPage() {
         _type: "product",
         name: product.name.trim(),
         price: parseFloat(product.price.replace(/[^0-9.]/g, "")),
-        tags: product.tag.split(",").map(t => t.trim()),
+        tags: product.tag 
+          ? product.tag.split(",").map(t => t.trim()).filter(t => t)
+          : [], // Handle missing tags
         category: product.category.trim(),
-        description: product.description.trim(),
-        longDescription: product["long description"].trim(),
+        description: product.description?.trim() || "", // Handle optional field
+        longDescription: product["long description"]?.trim() || "", // Handle optional field
         stock: parseInt(product.stock.replace(/[^0-9]/g, ""), 10)
       }));
 
-      const response = await fetch("/api/products/bulk", {
+      const response = await fetch("/api/bulk", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(sanityProducts),

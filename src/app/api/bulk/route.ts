@@ -5,6 +5,14 @@ export async function POST(req: Request) {
   try {
     const products = await req.json();
 
+    // Validate required fields
+    if (!Array.isArray(products)) {
+        return NextResponse.json(
+        { error: "Invalid request body: expected an array of products" },
+        { status: 400 }
+        );
+    }      
+
     const transactions = products.map((product: any) => ({
       create: {
         _type: "product",
