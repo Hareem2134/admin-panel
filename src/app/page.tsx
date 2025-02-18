@@ -2,7 +2,7 @@
 import AdminLayout from "../../components/AdminLayout";
 import { useEffect, useState } from "react";
 import { client } from "../sanity/lib/client";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Area, Line, AreaChart } from 'recharts';
 import RealTimeOrders from "../../components/RealTimeOrders";
 import { useUser, SignInButton } from "@clerk/nextjs";
 import { ArrowUpRight, ChevronRight, Clock, DollarSign, Package, Utensils } from "lucide-react";
@@ -116,61 +116,101 @@ const HomePage = () => {
         </div>
 
         {/* Sales Chart */}
-{/* Sales Overview Chart */}
-<div className="mt-6 sm:mt-8 bg-white p-4 sm:p-6 rounded-xl border border-gray-300 shadow-lg">
-  {/* Chart Header */}
-  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6">
-    <div className="space-y-1">
-      <h2 className="text-xl font-semibold text-gray-900">Sales Overview</h2>
-      <p className="text-sm text-gray-500">Monthly revenue performance</p>
-    </div>
-    <div className="flex items-center space-x-2 mt-3 sm:mt-0">
-      <div className="flex items-center">
-        <div className="w-3 h-3 bg-indigo-500 rounded-full mr-2"></div>
-        <span className="text-sm text-gray-600">2024 Sales</span>
-      </div>
-    </div>
-  </div>
-
-  {/* Chart Container */}
-  <div className="h-72">
-    <ResponsiveContainer width="100%" height="100%">
-      <BarChart data={stats.salesData}>
-        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
-        <XAxis
-          dataKey="month"
-          tick={{ fill: "#6b7280" }}
-          axisLine={false}
-          tickLine={false}
-        />
-        <YAxis
-          tick={{ fill: "#6b7280" }}
-          axisLine={false}
-          tickLine={false}
-          width={80}
-        />
-        <Tooltip
-          cursor={false}
-          content={({ active, payload }) => (
-            <div className="bg-white p-3 rounded-lg shadow-md border border-gray-100">
-              <p className="font-medium text-gray-900">{payload?.[0]?.payload.month}</p>
-              <p className="text-indigo-600">${payload?.[0]?.value?.toLocaleString()}</p>
+        <div className="mt-6 sm:mt-8 bg-white p-4 sm:p-6 rounded-2xl border border-gray-300 shadow-gray-500 shadow-lg hover:shadow-gray-500 hover:shadow-xl transition-shadow">
+          {/* Header */}
+          <div className="flex items-start sm:items-center justify-between mb-6">
+            <div className="space-y-2">
+              <h2 className="text-2xl font-bold text-gray-900">Sales Performance</h2>
+              <p className="text-sm text-gray-500 font-medium">2024 Monthly Revenue</p>
             </div>
-          )}
-        />
-        <Bar
-          dataKey="sales"
-          fill="#4f46e5"
-          radius={[6, 6, 0, 0]}
-          barSize={24}
-        />
-      </BarChart>
-    </ResponsiveContainer>
-  </div>
-</div>
+            <div className="flex items-center bg-indigo-50 px-3 py-1 rounded-full">
+              <div className="w-2.5 h-2.5 bg-indigo-600 rounded-full mr-2"></div>
+              <span className="text-sm font-medium text-indigo-800">Actual Sales</span>
+            </div>
+          </div>
+
+          {/* Enhanced Area Chart */}
+          <div className="h-80 relative">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={stats.salesData}>
+                <defs>
+                  <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.2} />
+                    <stop offset="95%" stopColor="#4f46e5" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+
+                {/* Grid and Axes */}
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
+                <XAxis
+                  dataKey="month"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: "#6b7280", fontSize: 12 }}
+                  padding={{ left: 20, right: 20 }}
+                />
+                <YAxis
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: "#6b7280", fontSize: 12 }}
+                  width={80}
+                  tickFormatter={(value) => `$${value / 1000}k`}
+                />
+
+                {/* Tooltip */}
+                <Tooltip
+                  content={({ active, payload }) => (
+                    <div className="bg-white p-3 rounded-lg shadow-xl border border-gray-100">
+                      <p className="text-sm font-semibold text-gray-900 mb-2">
+                        {payload?.[0]?.payload.month}
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-indigo-600 rounded-full"></div>
+                        <span className="text-sm text-gray-600">
+                          Sales: <span className="font-medium text-indigo-600">
+                            ${(payload?.[0]?.value || 0).toLocaleString()}
+                          </span>
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                />
+
+                {/* Data Visualization */}
+                <Area
+                  type="monotone"
+                  dataKey="sales"
+                  stroke="#4f46e5"
+                  strokeWidth={2}
+                  fill="url(#salesGradient)"
+                  fillOpacity={1}
+                  dot={{
+                    fill: "#4f46e5",
+                    stroke: "#fff",
+                    strokeWidth: 2,
+                    r: 4,
+                  }}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+
+            {/* Current Month Indicator */}
+            {stats.salesData?.length > 0 && (
+              <div className="absolute top-4 right-4 bg-white px-3 py-1.5 rounded-full shadow-sm border border-gray-100 flex items-center gap-2">
+                <div className="w-2.5 h-2.5 bg-indigo-600 rounded-full animate-pulse"></div>
+                <span className="text-sm font-medium text-gray-700">
+                  {stats.salesData[stats.salesData.length - 1].month}: 
+                  <span className="ml-1 text-indigo-600">
+                    ${(stats.salesData[stats.salesData.length - 1].sales / 1000).toFixed(1)}k
+                  </span>
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
 
         {/* Recent Orders */}
-        <div className="mt-6 sm:mt-8 bg-white p-4 sm:p-6 rounded-xl border border-gray-300 shadow-gray-500 shadow-lg">
+        <div className="mt-6 sm:mt-8 bg-white p-4 sm:p-6 rounded-xl border border-gray-300 shadow-gray-500 shadow-lg hover:shadow-gray-500 hover:shadow-xl">
           {/* Header */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6">
             <div className="space-y-1">
