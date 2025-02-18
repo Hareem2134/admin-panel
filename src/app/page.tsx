@@ -72,39 +72,43 @@ const HomePage = () => {
 
   return (
     <AdminLayout>
-      <div className="p-6 space-y-8 max-w-7xl mx-auto">
+      <div className="p-4 sm:p-6 max-w-6xl mx-auto">
         {/* Header */}
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard Overview</h1>
-          <p className="text-gray-500">Insights into your restaurant performance</p>
+        <div className="mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            Dashboard Overview
+          </h1>
+          <p className="text-sm sm:text-base text-gray-500 mt-1">
+            Insights into your restaurant performance
+          </p>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-          <StatCard 
-            title="Total Orders" 
-            value={stats.totalOrders} 
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          <StatCard
+            title="Total Orders"
+            value={stats.totalOrders}
             icon={<Package className="h-5 w-5" />}
             trend="12.3%"
             color="indigo"
           />
-          <StatCard 
-            title="Revenue" 
-            value={`$${stats.totalRevenue.toLocaleString()}`} 
+          <StatCard
+            title="Revenue"
+            value={`$${stats.totalRevenue.toLocaleString()}`}
             icon={<DollarSign className="h-5 w-5" />}
             trend="8.1%"
             color="blue"
           />
-          <StatCard 
-            title="Pending Orders" 
-            value={stats.pendingOrders} 
+          <StatCard
+            title="Pending Orders"
+            value={stats.pendingOrders}
             icon={<Clock className="h-5 w-5" />}
             trend="2.4%"
             color="amber"
           />
-          <StatCard 
-            title="Menu Items" 
-            value={stats.productsCount} 
+          <StatCard
+            title="Menu Items"
+            value={stats.productsCount}
             icon={<Utensils className="h-5 w-5" />}
             trend="5.6%"
             color="purple"
@@ -112,7 +116,7 @@ const HomePage = () => {
         </div>
 
         {/* Sales Chart */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+        <div className="mt-6 sm:mt-8 bg-white p-4 sm:p-6 rounded-xl shadow-lg border border-gray-100">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6">
             <div className="space-y-1">
               <h2 className="text-xl font-semibold text-gray-900">Sales Overview</h2>
@@ -125,23 +129,23 @@ const HomePage = () => {
               </div>
             </div>
           </div>
-          <div className="h-80">
+          <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={stats.salesData}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
-                <XAxis 
-                  dataKey="month" 
-                  tick={{ fill: '#6b7280' }}
+                <XAxis
+                  dataKey="month"
+                  tick={{ fill: "#6b7280" }}
                   axisLine={false}
                   tickLine={false}
                 />
-                <YAxis 
-                  tick={{ fill: '#6b7280' }}
+                <YAxis
+                  tick={{ fill: "#6b7280" }}
                   axisLine={false}
                   tickLine={false}
                   width={80}
                 />
-                <Tooltip 
+                <Tooltip
                   cursor={false}
                   content={({ active, payload }) => (
                     <div className="bg-white p-3 rounded-lg shadow-md border border-gray-100">
@@ -150,9 +154,9 @@ const HomePage = () => {
                     </div>
                   )}
                 />
-                <Bar 
-                  dataKey="sales" 
-                  fill="#4f46e5" 
+                <Bar
+                  dataKey="sales"
+                  fill="#4f46e5"
                   radius={[6, 6, 0, 0]}
                   barSize={24}
                 />
@@ -161,38 +165,36 @@ const HomePage = () => {
           </div>
         </div>
 
-        {/* Recent Orders Section */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div className="space-y-1">
-                <h2 className="text-xl font-semibold text-gray-900">Recent Orders</h2>
-                <p className="text-sm text-gray-500">Latest customer transactions</p>
-              </div>
-              <button className="flex items-center text-indigo-600 hover:text-indigo-700 text-sm font-medium">
-                View All
-                <ChevronRight className="h-4 w-4 ml-1" />
-              </button>
+        {/* Recent Orders */}
+        <div className="mt-6 sm:mt-8 bg-white p-4 sm:p-6 rounded-xl shadow-lg border border-gray-100">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6">
+            <div className="space-y-1">
+              <h2 className="text-xl font-semibold text-gray-900">Recent Orders</h2>
+              <p className="text-sm text-gray-500">Latest customer transactions</p>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Order ID</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Customer</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Amount</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  <tr>
-                    <td colSpan={4} className="p-4">
-                      <RealTimeOrders />
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+            <button className="flex items-center text-blue-600 hover:text-blue-700 font-medium text-sm mt-3 sm:mt-0">
+              View All
+              <ChevronRight className="h-4 w-4 ml-1" />
+            </button>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-gray-200">
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Order ID</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Customer</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Amount</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                <tr>
+                  <td colSpan={4} className="p-4">
+                    <RealTimeOrders />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -205,7 +207,7 @@ const StatCard = ({ title, value, icon, trend, color }: {
   value: string | number;
   icon: React.ReactNode;
   trend?: string;
-  color: 'indigo' | 'blue' | 'amber' | 'purple'; // Explicitly define allowed values
+  color: 'indigo' | 'blue' | 'amber' | 'purple';
 }) => {
   const colors = {
     indigo: { bg: 'bg-indigo-100', text: 'text-indigo-600' },
@@ -215,7 +217,7 @@ const StatCard = ({ title, value, icon, trend, color }: {
   };
 
   return (
-    <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+    <div className="bg-white p-4 sm:p-5 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm text-gray-500 mb-1">{title}</p>

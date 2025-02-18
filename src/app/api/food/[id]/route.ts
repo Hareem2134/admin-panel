@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { client } from "@/sanity/lib/client";
 
-// ✅ Use Request & context with params correctly
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
-  const id = params.id; // Ensure correct param extraction
-
+export async function PUT(req: Request, context: any) {
+  // Cast context to our expected shape
+  const { params } = context as { params: { id: string } };
+  const id = params.id;
+  
   try {
     const formData = await req.formData();
     const files = formData.getAll("images") as File[];
@@ -26,7 +27,10 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
         : [];
 
     if (!Array.isArray(tags)) {
-      return NextResponse.json({ error: "Invalid tags format" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid tags format" },
+        { status: 400 }
+      );
     }
 
     const updatedFood = await client
@@ -35,7 +39,9 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
         ...data,
         tags,
         price: parseFloat(data.price),
-        originalPrice: data.originalPrice ? parseFloat(data.originalPrice) : undefined,
+        originalPrice: data.originalPrice
+          ? parseFloat(data.originalPrice)
+          : undefined,
         images: [...existingImages, ...uploadedImages],
         available: Boolean(data.available),
       })
@@ -54,13 +60,19 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   }
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
-  const id = params.id; // Ensure correct param extraction
-
+export async function DELETE(req: Request, context: any) {
+  const { params } = context as { params: { id: string } };
+  const id = params.id;
   try {
     await client.delete(id);
-    return NextResponse.json({ message: "Food item deleted successfully" }, { status: 200 });
+    return NextResponse.json(
+      { message: "Food item deleted successfully" },
+      { status: 200 }
+    );
   } catch (error) {
-    return NextResponse.json({ error: "Failed to delete food item" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to delete food item" },
+      { status: 500 }
+    );
   }
 }

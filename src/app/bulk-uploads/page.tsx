@@ -103,7 +103,7 @@ export default function BulkUploadPage() {
   return (
     <AdminLayout>
       <div className="max-w-4xl mx-auto p-6">
-        <h1 className="text-3xl font-bold mb-6">Bulk Product Upload</h1>
+        <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Bulk Product Upload</h1>
         
         {/* CSV Requirements */}
         <div className="bg-blue-50 p-4 rounded-lg mb-6">
