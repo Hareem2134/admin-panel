@@ -116,57 +116,61 @@ const HomePage = () => {
         </div>
 
         {/* Sales Chart */}
-        <div className="mt-6 sm:mt-8 bg-white p-4 sm:p-6 rounded-xl shadow-lg border border-gray-100">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6">
-            <div className="space-y-1">
-              <h2 className="text-xl font-semibold text-gray-900">Sales Overview</h2>
-              <p className="text-sm text-gray-500">Monthly revenue performance</p>
+{/* Sales Overview Chart */}
+<div className="mt-6 sm:mt-8 bg-white p-4 sm:p-6 rounded-xl border border-gray-300 shadow-lg">
+  {/* Chart Header */}
+  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6">
+    <div className="space-y-1">
+      <h2 className="text-xl font-semibold text-gray-900">Sales Overview</h2>
+      <p className="text-sm text-gray-500">Monthly revenue performance</p>
+    </div>
+    <div className="flex items-center space-x-2 mt-3 sm:mt-0">
+      <div className="flex items-center">
+        <div className="w-3 h-3 bg-indigo-500 rounded-full mr-2"></div>
+        <span className="text-sm text-gray-600">2024 Sales</span>
+      </div>
+    </div>
+  </div>
+
+  {/* Chart Container */}
+  <div className="h-72">
+    <ResponsiveContainer width="100%" height="100%">
+      <BarChart data={stats.salesData}>
+        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
+        <XAxis
+          dataKey="month"
+          tick={{ fill: "#6b7280" }}
+          axisLine={false}
+          tickLine={false}
+        />
+        <YAxis
+          tick={{ fill: "#6b7280" }}
+          axisLine={false}
+          tickLine={false}
+          width={80}
+        />
+        <Tooltip
+          cursor={false}
+          content={({ active, payload }) => (
+            <div className="bg-white p-3 rounded-lg shadow-md border border-gray-100">
+              <p className="font-medium text-gray-900">{payload?.[0]?.payload.month}</p>
+              <p className="text-indigo-600">${payload?.[0]?.value?.toLocaleString()}</p>
             </div>
-            <div className="flex items-center space-x-2 mt-3 sm:mt-0">
-              <div className="flex items-center">
-                <div className="w-3 h-3 bg-indigo-500 rounded-full mr-2"></div>
-                <span className="text-sm text-gray-600">2024 Sales</span>
-              </div>
-            </div>
-          </div>
-          <div className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={stats.salesData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
-                <XAxis
-                  dataKey="month"
-                  tick={{ fill: "#6b7280" }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <YAxis
-                  tick={{ fill: "#6b7280" }}
-                  axisLine={false}
-                  tickLine={false}
-                  width={80}
-                />
-                <Tooltip
-                  cursor={false}
-                  content={({ active, payload }) => (
-                    <div className="bg-white p-3 rounded-lg shadow-md border border-gray-100">
-                      <p className="font-medium text-gray-900">{payload?.[0]?.payload.month}</p>
-                      <p className="text-indigo-600">${payload?.[0]?.value?.toLocaleString()}</p>
-                    </div>
-                  )}
-                />
-                <Bar
-                  dataKey="sales"
-                  fill="#4f46e5"
-                  radius={[6, 6, 0, 0]}
-                  barSize={24}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+          )}
+        />
+        <Bar
+          dataKey="sales"
+          fill="#4f46e5"
+          radius={[6, 6, 0, 0]}
+          barSize={24}
+        />
+      </BarChart>
+    </ResponsiveContainer>
+  </div>
+</div>
 
         {/* Recent Orders */}
-        <div className="mt-6 sm:mt-8 bg-white p-4 sm:p-6 rounded-xl shadow-lg border border-gray-100">
+        <div className="mt-6 sm:mt-8 bg-white p-4 sm:p-6 rounded-xl border border-gray-300 shadow-gray-500 shadow-lg">
           {/* Header */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6">
             <div className="space-y-1">
@@ -182,15 +186,6 @@ const HomePage = () => {
           {/* Orders Table */}
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead>
-                <tr className="bg-gray-50">
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Order ID</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Customer</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Amount</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Status</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Actions</th>
-                </tr>
-              </thead>
               <tbody className="divide-y divide-gray-200">
                 <tr>
                   <td colSpan={5} className="p-4">
@@ -201,7 +196,6 @@ const HomePage = () => {
             </table>
           </div>
 
-          
         </div>
       </div>
     </AdminLayout>
@@ -223,7 +217,7 @@ const StatCard = ({ title, value, icon, trend, color }: {
   };
 
   return (
-    <div className="bg-white p-4 sm:p-5 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow">
+    <div className="bg-white p-4 sm:p-5 rounded-xl border-gray-300 shadow-gray-500 shadow-lg hover:shadow-gray-500 hover:shadow-xl transition-shadow">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm text-gray-500 mb-1">{title}</p>

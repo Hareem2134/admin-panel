@@ -15,20 +15,27 @@ export interface Discount extends SanityDocument {
 }
 
 export interface Order extends SanityDocument {
-  customerEmail: ReactI18NextChildren | Iterable<ReactI18NextChildren>;
-  customerName: ReactI18NextChildren | Iterable<ReactI18NextChildren>;
-//   customerName: ReactI18NextChildren | Iterable<ReactI18NextChildren>;
+  customerEmail: string;
+  customerName: string;
   user: { _ref: string };
-  items: Array<{
-    product: { _ref: string };
-    quantity: number;
-  }>;
-  status: string;
+  items: {
+    food: { _ref: string }; // Reference to the food item
+    quantity: number; // Quantity of the food item
+    priceAtPurchase: number; // Price at the time of purchase
+  }[];
   total: number;
+  subtotal: number;
+  discount: number;
+  shippingCost: number;
+  status: "pending" | "shipped" | "delivered";
+  date: string | number | Date;
   shippingAddress: {
     street: string;
     city: string;
     state: string;
     zip: string;
+    country: string;
   };
+  paymentMethod: string; // Payment method (e.g., "credit card", "paypal")
+  transactionId: string; // Transaction ID
 }

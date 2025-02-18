@@ -38,6 +38,28 @@ export default function RealTimeOrders() {
     <div className="w-full">
       {/* Orders Table */}
       <table className="w-full">
+        <thead>
+          <tr className="bg-gray-50">
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Order ID
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Date
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Total
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Status
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Payment Method
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Actions
+            </th>
+          </tr>
+        </thead>
         <tbody className="divide-y divide-gray-200">
           {orders.map((order) => (
             <tr key={order._id} className="hover:bg-gray-50 transition-colors">
@@ -46,17 +68,18 @@ export default function RealTimeOrders() {
                 #{order._id.slice(-6).toUpperCase()}
               </td>
 
-              {/* Customer */}
+              {/* Order Date */}
               <td className="px-6 py-4 text-sm text-gray-900">
-                <div className="flex items-center">
-                  <div className="ml-4">
-                    <div className="font-medium text-gray-900">{order.customerName}</div>
-                    <div className="text-gray-500">{order.customerEmail}</div>
-                  </div>
-                </div>
+                {new Date(order.date).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
               </td>
 
-              {/* Amount */}
+              {/* Total */}
               <td className="px-6 py-4 text-sm text-gray-900">
                 ${order.total.toFixed(2)}
               </td>
@@ -64,14 +87,19 @@ export default function RealTimeOrders() {
               {/* Status */}
               <td className="px-6 py-4 text-sm text-gray-900">
                 <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                  order.status === 'pending' 
-                    ? 'bg-yellow-100 text-yellow-800'
-                    : order.status === 'shipped'
-                    ? 'bg-blue-100 text-blue-800'
-                    : 'bg-green-100 text-green-800'
+                  order.status === "pending"
+                    ? "bg-yellow-100 text-yellow-800"
+                    : order.status === "shipped"
+                    ? "bg-blue-100 text-blue-800"
+                    : "bg-green-100 text-green-800"
                 }`}>
                   {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                 </span>
+              </td>
+
+              {/* Payment Method */}
+              <td className="px-6 py-4 text-sm text-gray-900">
+                {order.paymentMethod}
               </td>
 
               {/* Actions */}
@@ -81,7 +109,12 @@ export default function RealTimeOrders() {
                     View Details
                   </button>
                   <button className="text-gray-500 hover:text-gray-700">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
                       <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                     </svg>
                   </button>
