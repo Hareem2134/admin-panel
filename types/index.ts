@@ -15,6 +15,8 @@ export interface Discount extends SanityDocument {
 }
 
 export interface Order extends SanityDocument {
+  customerEmail: ReactI18NextChildren | Iterable<ReactI18NextChildren>;
+  customerName: ReactI18NextChildren | Iterable<ReactI18NextChildren>;
 //   customerName: ReactI18NextChildren | Iterable<ReactI18NextChildren>;
   user: { _ref: string };
   items: Array<{

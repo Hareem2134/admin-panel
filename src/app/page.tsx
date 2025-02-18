@@ -167,35 +167,41 @@ const HomePage = () => {
 
         {/* Recent Orders */}
         <div className="mt-6 sm:mt-8 bg-white p-4 sm:p-6 rounded-xl shadow-lg border border-gray-100">
+          {/* Header */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6">
             <div className="space-y-1">
               <h2 className="text-xl font-semibold text-gray-900">Recent Orders</h2>
               <p className="text-sm text-gray-500">Latest customer transactions</p>
             </div>
-            <button className="flex items-center text-blue-600 hover:text-blue-700 font-medium text-sm mt-3 sm:mt-0">
+            <button className="flex items-center text-blue-600 hover:text-blue-700 font-medium text-sm mt-3 sm:mt-0 transition-colors">
               View All
               <ChevronRight className="h-4 w-4 ml-1" />
             </button>
           </div>
+
+          {/* Orders Table */}
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-gray-200">
+                <tr className="bg-gray-50">
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Order ID</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Customer</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Amount</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Status</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
                 <tr>
-                  <td colSpan={4} className="p-4">
+                  <td colSpan={5} className="p-4">
                     <RealTimeOrders />
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
+
+          
         </div>
       </div>
     </AdminLayout>
